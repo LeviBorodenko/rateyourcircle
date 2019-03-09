@@ -233,7 +233,7 @@ class Solver extends Points {
 
             // check if radius is not too small
             if (this.bestGuess[0] < 0.1) {
-            	// Indicator of divergence
+                // Indicator of divergence
                 this.newtonConverged = false;
                 this.iterationCount = iteration
                 break
@@ -324,8 +324,63 @@ class Finder extends Solver {
 
         this.bestGuess = [...this.initialGuess]
 
-    }
-}
+    };
+
+    score() {
+    	/*
+		Gives the score for the best guess
+    	*/
+    	// first we center the points around the best guessed center
+    	let [r, midX, midY] = this.bestGuess;
+
+    	let points = [];
+
+    	for (let point of this.points) {
+    		points.push(math.subtract(point, [midX, midY]))
+    	};
+
+    	// scale by radius
+    	points = points.map(array => math.multiply(array, 1/r));
+
+    	// find center of mass
+    	let centerOfMass = math.mean(points, 0)
+    	
+    	// find deviance of center of mass
+    	const DMASS = norm(centerOfMass);
+    	
+    	// the next quanitity is the average distance
+        // from the circumference
+        let totalDeviance = 0;
+
+        for (let point of points) {
+
+        	totalDeviance += math.abs(norm(point) - 1)
+        }
+
+        const DRADIUS = totalDeviance / points.length
+        
+        // lastly, we find the angle to some base vector
+        // and check if the angles are not too far apart
+        const BASEVECTOR = [0, 1];
+        let angles = [];
+
+        for (let point of points) {
+        	// normalise point
+        	let pointN = point / norm(point);
+
+        	// find angle (mapped to [-1/2 , 1/2])
+        	angles.push(math.dot(pointN, BASEVECTOR) / 2);
+        };
+
+        // sort angles to find biggest gap
+        angles.sort();
+
+        let maxGap = 0;
+        for (let angle of angles.slice(0, -1)) {
+        	// continue here
+        }
+    };
+};
 
 class App {
 
@@ -399,17 +454,17 @@ class App {
     }
 
     drawCircle() {
-    	// first check if there is a circle to draw
-    	if(this.foundCircle) {
+        // first check if there is a circle to draw
+        if (this.foundCircle) {
 
-    		this.ctx.strokeStyle = "#FF0000";
-    		let [r, x, y] = this.circle
-    		this.ctx.beginPath();
-    		this.ctx.arc(x, y, r, 0 , 2*Math.PI);
+            this.ctx.strokeStyle = "#FF0000";
+            let [r, x, y] = this.circle
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, r, 0, 2 * Math.PI);
 
-    		this.ctx.stroke()
+            this.ctx.stroke()
 
-    	}
+        }
     }
     drawPath(path) {
         /*
@@ -417,7 +472,7 @@ class App {
     	*/
 
         // check if path is non empty
-        if (path == []) {
+        if (path[0] == undefined) {
             return false;
         };
 
@@ -466,10 +521,11 @@ class App {
     };
 
     clearApp() {
-    	// resets everything
-    	this.foundCircle = false;
-    	this.path = [];
-    	this.paths = [];
+        // resets everything
+        this.foundCircle = false;
+        this.stroking = false;
+        this.path = [];
+        this.paths = [];
 
     };
 
@@ -489,6 +545,12 @@ class App {
 
 
     startPath(event) {
+
+        // clear app if best circle is already found
+        if (this.foundCircle) {
+            this.clearApp()
+        };
+
         // start new path
         this.stroking = true
     };
@@ -519,22 +581,21 @@ class App {
     }
 
     findCricle() {
-    	
-    	// get list of points
-    	let points = this.paths.flat()
 
-    	// create Finder Object
-    	let finder = new Finder(points)
+        // get list of points
+        let points = this.paths.flat()
 
-    	// find best circle
-    	finder.findBestCircle()
+        // create Finder Object
+        let finder = new Finder(points)
 
-    	// save it as our circle
-    	this.circle = finder.bestGuess;
-    	this.foundCircle = true;
-    	console.log(finder.newtonConverged)
-    	console.log(this.circle)
-    	this.drawCircle()
+        // find best circle
+        finder.findBestCircle()
+
+        // save it as our circle
+        this.circle = finder.bestGuess;
+        this.foundCircle = true;
+        console.log(finder.score())
+        this.draw()
     }
 
     addListeners() {
@@ -543,7 +604,7 @@ class App {
         this.continuePath = this.continuePath.bind(this);
         this.endPath = this.endPath.bind(this);
         this.resizeCanvas = this.resizeCanvas.bind(this);
-        this.draw = this.draw.bind(this);
+        // this.draw = this.draw.bind(this);
         this.findCricle = this.findCricle.bind(this);
 
         // handle mouse down
@@ -565,8 +626,8 @@ class App {
             this.resizeCanvas);
 
         // handle click on evaluate button
-        this.evaluateButton.addEventListener("click", 
-        	this.findCricle)
+        this.evaluateButton.addEventListener("click",
+            this.findCricle)
 
     }
 
