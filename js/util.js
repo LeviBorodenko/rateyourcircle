@@ -4,6 +4,8 @@ const MAX_NUMBER_OF_POINTS = 10000;
 const MAX_ITERATIONS = 100;
 const TOLERANCE = 0.01;
 const MAX_NEWTON_ITERATIONS = 10;
+const INFO_TEST = `1. Draw your best circle on the canvas below <br>
+				   2. Click the 'Evaluate Drawing'-button and see how close you were to a perfect circle.` 
 
 function printToPage(text) {
     /*
@@ -401,15 +403,18 @@ class Finder extends Solver {
 
 class App {
 
-    constructor(canvasContainerID, evaluateButtonID, progressBarID) {
+    constructor(canvasContainerID, evaluateButtonID, progressBarID, infoID) {
         // finding canvas container node
         this.canvasContainer = document.getElementById(canvasContainerID);
 
         // finding evaluate button node
         this.evaluateButton = document.getElementById(evaluateButtonID);
 
-        // creating progress-bar node
+        // creating progress-bar object
         this.progressBar = new ldBar("#" + progressBarID);
+
+        // finding info node
+        this.info = document.getElementById(infoID)
 
         // attributes for handling paths
         this.stroking = false;
@@ -433,6 +438,14 @@ class App {
         this.resizeCanvas();
 
     };
+
+    infoHandler() {
+    	Swal.fire({
+  			type: 'info',
+  			title: 'How To:',
+  			html: INFO_TEST
+		})
+    }
 
     resizeCanvas() {
 
@@ -461,8 +474,8 @@ class App {
         // returns list of coord. relative to 
         // canvas origin
         let [canvasX, canvasY] = [
-            this.containerDimensions.x,
-            this.containerDimensions.y
+            this.containerDimensions.left + window.scrollX,
+            this.containerDimensions.top + window.scrollY
         ];
 
         let [pageX, pageY] = [
@@ -625,7 +638,7 @@ class App {
         this.continuePath = this.continuePath.bind(this);
         this.endPath = this.endPath.bind(this);
         this.resizeCanvas = this.resizeCanvas.bind(this);
-        // this.draw = this.draw.bind(this);
+        this.infoHandler = this.infoHandler.bind(this);
         this.findCricle = this.findCricle.bind(this);
 
         // handle mouse down
@@ -650,11 +663,10 @@ class App {
         this.evaluateButton.addEventListener("click",
             this.findCricle)
 
+        // handle info press
+        this.info.addEventListener("click",
+        	this.infoHandler)
+
     }
 
-    test() {
-        // for debugging
-        this.ctx.fillStyle = "red"
-        this.ctx.fillRect(0, 0, 100, 100)
-    };
 };
