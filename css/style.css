@@ -3,65 +3,29 @@ body {
 	background-color: #1D1E22;
 }
 
-.container {
-	display: flex;
-	flex-direction: column;
+div.container {
+	display: grid;
 	height: 100vh;
-	padding: 0px;
+	width: 100vw;
+
+	grid-template: ".corner1 .header .corner2" 11%
+				   "#canvasID #canvasID #canvasID" auto
+				   "#buttonID #progressID #progressID" 14%
+				   / 14% auto 14%;
 }
 
-.col {
-	border: 2px dotted green;
-}
+/*
+Progress bar
+*/
 
-.header {
-	height: 10vh;
-	justify-content: center;
-	text-align: center;
-}
-#canvas-container {
-	transition: 1s;
-	flex-grow: 1;
-	overflow: hidden;
-}
-.footer {
-	height: 10vh;
-}
-
-.footer-container {
-	display: -webkit-flex;
-	display: -moz-flex;
-	display: -ms-flex;
-	display: -o-flex;
-	display: flex;
-
-	flex-direction: row;
-	height: 100%
-}
-
-.row {
-	border-width: 0px 2px 0px 2px;
-	border-style: dashed;
-	border-color: red;
-	flex-grow: 1;
-}
-
-.scale-container{
-	width: 80vw;
-	overflow: hidden;
-}
-
-#scale {
-	height: 100%;
+#progress-bar {
 	width: 100%;
-	background: hsl(120, 100%, 50%);
-	transition: 1s ease-in;
-	transform: translate(-100%, 0);
+	height: 100%;
 }
 
-.scale-container:hover #scale{
-	transform: translate(0, 0);
-	background: hsl(0, 100%, 50%);
+.label-center {
+	color: white;
+	text-shadow: none;
 }
 
 

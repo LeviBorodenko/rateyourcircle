@@ -1,6 +1,6 @@
 "use strict"
 
-let app = new App("canvas-container", "evaluate-button");
+let app = new App("canvas-container", "evaluate-button", "progress-bar");
 app.test()
 app.addListeners()
 

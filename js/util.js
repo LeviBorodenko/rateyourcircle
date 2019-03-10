@@ -1,7 +1,7 @@
 "use strict"
 
 const MAX_NUMBER_OF_POINTS = 10000;
-const MAX_ITERATIONS = 50;
+const MAX_ITERATIONS = 100;
 const TOLERANCE = 0.01;
 const MAX_NEWTON_ITERATIONS = 10;
 
@@ -291,8 +291,8 @@ class Finder extends Solver {
         let [r, midX, midY] = this.initialGuess
 
         r = math.random(0.1 * r + 0.1, 50 * r + 1);
-        midX = math.random(0.1 * midX, 2 * midX);
-        midY = math.random(0.1 * midY, 2 * midY);
+        midX = math.random(- 20 * midX, 20 * midX);
+        midY = math.random(- 20 * midY, 20 * midY);
 
         this.bestGuess = [r, midX, midY];
     }
@@ -326,70 +326,90 @@ class Finder extends Solver {
 
     };
 
-    score() {
-    	/*
+    get score() {
+        /*
 		Gives the score for the best guess
     	*/
-    	// first we center the points around the best guessed center
-    	let [r, midX, midY] = this.bestGuess;
+        // first we center the points around the best guessed center
+        let [r, midX, midY] = this.bestGuess;
 
-    	let points = [];
+        let points = [];
 
-    	for (let point of this.points) {
-    		points.push(math.subtract(point, [midX, midY]))
-    	};
+        for (let point of this.points) {
+            points.push(math.subtract(point, [midX, midY]))
+        };
 
-    	// scale by radius
-    	points = points.map(array => math.multiply(array, 1/r));
+        // scale by radius
+        points = points.map(array => math.multiply(array, 1 / r));
 
-    	// find center of mass
-    	let centerOfMass = math.mean(points, 0)
-    	
-    	// find deviance of center of mass
-    	const DMASS = norm(centerOfMass);
-    	
-    	// the next quanitity is the average distance
+        // find center of mass
+        let centerOfMass = math.mean(points, 0)
+
+        // find deviance of center of mass
+        const DMASS = norm(centerOfMass);
+
+        // the next quanitity is the average distance
         // from the circumference
         let totalDeviance = 0;
 
         for (let point of points) {
 
-        	totalDeviance += math.abs(norm(point) - 1)
+            totalDeviance += math.abs(norm(point) - 1)
         }
 
         const DRADIUS = totalDeviance / points.length
-        
-        // lastly, we find the angle to some base vector
+
+        // lastly, we find the angle to [0,1]
         // and check if the angles are not too far apart
-        const BASEVECTOR = [0, 1];
         let angles = [];
 
         for (let point of points) {
-        	// normalise point
-        	let pointN = point / norm(point);
 
-        	// find angle (mapped to [-1/2 , 1/2])
-        	angles.push(math.dot(pointN, BASEVECTOR) / 2);
+            // normalise point
+            let [x, y] = math.multiply(point, 1 / norm(point));
+
+            // find dotproduct
+            angles.push(math.atan2(x, y));
         };
 
+
+        // converting
         // sort angles to find biggest gap
-        angles.sort();
+        angles.sort((a, b) => a - b);
+
+
 
         let maxGap = 0;
-        for (let angle of angles.slice(0, -1)) {
-        	// continue here
-        }
+        for (let j = 1, length2 = angles.length; j < length2; j++) {
+
+            let gap = math.abs(angles[j] - angles[j - 1]);
+            if (gap > maxGap) {
+                maxGap = gap
+            };
+
+        };
+
+        // manually find the gap between the first and last point
+        const DGAP = math.max(maxGap,
+            2 * math.PI - (angles[angles.length - 1] - angles[0])) / (2 * math.PI);
+
+        // calculating final score
+        return 100 * (1 - (0.5 * DGAP + 0.6 * DRADIUS + 0.1*DMASS))
+
     };
 };
 
 class App {
 
-    constructor(canvasContainerID, evaluateButtonID) {
+    constructor(canvasContainerID, evaluateButtonID, progressBarID) {
         // finding canvas container node
         this.canvasContainer = document.getElementById(canvasContainerID);
 
         // finding evaluate button node
         this.evaluateButton = document.getElementById(evaluateButtonID);
+
+        // creating progress-bar node
+        this.progressBar = new ldBar("#" + progressBarID);
 
         // attributes for handling paths
         this.stroking = false;
@@ -594,7 +614,8 @@ class App {
         // save it as our circle
         this.circle = finder.bestGuess;
         this.foundCircle = true;
-        console.log(finder.score())
+        this.score = finder.score
+        this.progressBar.set(this.score)
         this.draw()
     }
 
