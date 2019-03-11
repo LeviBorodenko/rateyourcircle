@@ -4,8 +4,9 @@ const MAX_NUMBER_OF_POINTS = 10000;
 const MAX_ITERATIONS = 100;
 const TOLERANCE = 0.01;
 const MAX_NEWTON_ITERATIONS = 10;
-const INFO_TEST = `1. Draw your best circle on the canvas below <br>
+const INFO_TEXT = `1. Draw your best circle on the canvas below. <br>
 				   2. Click the 'Evaluate Drawing'-button and see how close you were to a perfect circle.` 
+const FOOTER_TEXT = `Code at &nbsp; <a href="https://github.com/LeviBorodenko/rateyourcirlce"> Github</a>`
 
 function printToPage(text) {
     /*
@@ -396,7 +397,19 @@ class Finder extends Solver {
             2 * math.PI - (angles[angles.length - 1] - angles[0])) / (2 * math.PI);
 
         // calculating final score
-        return 100 * (1 - (0.5 * DGAP + 0.6 * DRADIUS + 0.1*DMASS))
+        let rawScore = (1 - (0.5 * DGAP + 0.6 * DRADIUS + 0.1*DMASS));
+
+        if (this.newtonConverged) {
+            if (rawScore > 0.9) {
+                return 100*rawScore
+            } else if (rawScore > 0.7) {
+                return 100*rawScore**2
+            } else {
+                return 100*rawScore**4
+            }
+        } else {
+            return 20 * rawScore / 2
+        }
 
     };
 };
@@ -443,7 +456,8 @@ class App {
     	Swal.fire({
   			type: 'info',
   			title: 'How To:',
-  			html: INFO_TEST
+  			html: INFO_TEXT,
+            footer: FOOTER_TEXT
 		})
     }
 
@@ -473,17 +487,31 @@ class App {
 
         // returns list of coord. relative to 
         // canvas origin
+        let pageX, pageY
+
         let [canvasX, canvasY] = [
-            this.containerDimensions.left + window.scrollX,
-            this.containerDimensions.top + window.scrollY
-        ];
+                    this.containerDimensions.left + window.scrollX,
+                    this.containerDimensions.top + window.scrollY
+                    ]; 
 
-        let [pageX, pageY] = [
-            event.pageX,
-            event.pageY
-        ];
+        switch (event.type) {
+            case "touchstart":
+            case "touchmove":
+            case "touchend":
+                pageX =  event.touches[0].pageX
+                pageY =  event.touches[0].pageY
 
-        return [pageX - canvasX, pageY - canvasY]
+                               
+                return [pageX - canvasX, pageY - canvasY]
+            default:
+                pageX =  event.pageX
+                pageY =  event.pageY
+                
+                               
+                return [pageX - canvasX, pageY - canvasY]
+        };
+
+  
     }
 
     drawCircle() {
@@ -578,6 +606,8 @@ class App {
 
 
     startPath(event) {
+        // prevent default behaviour
+        event.preventDefault();
 
         // clear app if best circle is already found
         if (this.foundCircle) {
@@ -589,6 +619,9 @@ class App {
     };
 
     continuePath(event) {
+        // prevent default behaviour
+        event.preventDefault();
+
         // push coord. into current path
         // if we are stroking
         if (this.stroking) {
@@ -603,6 +636,9 @@ class App {
     };
 
     endPath(event) {
+        // prevent default behaviour
+        event.preventDefault();
+
         // end path if we are stroking
         if (this.stroking) {
 
@@ -644,14 +680,21 @@ class App {
         // handle mouse down
         this.canvasContainer.addEventListener("mousedown",
             this.startPath);
+        this.canvasContainer.addEventListener("touchstart",
+            this.startPath);
 
         // handle mouse move
         this.canvasContainer.addEventListener("mousemove",
+            this.continuePath);
+        this.canvasContainer.addEventListener("touchmove",
             this.continuePath);
 
         // handle mouse up
         this.canvasContainer.addEventListener("mouseup",
             this.endPath);
+        this.canvasContainer.addEventListener("touchend",
+            this.endPath);
+
 
         // handle resize
         window.addEventListener("resize",
