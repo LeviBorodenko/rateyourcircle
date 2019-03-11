@@ -6,7 +6,7 @@ const TOLERANCE = 0.01;
 const MAX_NEWTON_ITERATIONS = 10;
 const INFO_TEXT = `1. Draw your best circle on the canvas below. <br>
 				   2. Click the 'Evaluate Drawing'-button and see how close you were to a perfect circle.` 
-const FOOTER_TEXT = `Code at &nbsp; <a href="https://github.com/LeviBorodenko/rateyourcirlce"> Github</a>`
+const FOOTER_TEXT = `Code at &nbsp; <a href="https://github.com/LeviBorodenko/rateyourcircle"> Github</a>`
 
 function printToPage(text) {
     /*

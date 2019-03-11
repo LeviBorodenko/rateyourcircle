@@ -9,4 +9,4 @@ ____
 
 ### How does it work?
 
-We use an optimised gradient descent algorithm to find a cirlce that minimises the cumulative pointwise misfit.
+We use an optimised gradient descent algorithm to find a circle that minimises the cumulative pointwise misfit.
