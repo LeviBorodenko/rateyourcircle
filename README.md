@@ -1,5 +1,5 @@
 # Rate your Circle
-_Draw a circle and see how close you were to a perfect cirlce._
+_Draw a circle and see how close you were to a perfect circle._
 
 [DEMO](https://cirlce.levib.dev)
 
