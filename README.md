@@ -1,7 +1,7 @@
 # Rate your Circle
 _Draw a circle and see how close you were to a perfect cirlce._
 
-[DEMO](http://users.ox.ac.uk/~wadh5221/bestcircle/)
+[DEMO](https://cirlce.levib.dev)
 
 ![](https://i.imgur.com/zEt7IuX.png)
 ____
