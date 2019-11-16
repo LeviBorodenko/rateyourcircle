@@ -1,7 +1,7 @@
 # Rate your Circle
 _Draw a circle and see how close you were to a perfect circle._
 
-[DEMO](https://cirlce.levib.dev)
+[DEMO](https://circle.levib.dev)
 
 ![](https://i.imgur.com/zEt7IuX.png)
 ____
